@@ -16,6 +16,10 @@ let package = Package(
             targets: ["CHUtils"]
         ),
     ],
+    dependencies: [
+        .package(url: "https://github.com/Quick/Quick.git", exact: "5.0.1"),
+        .package(url: "https://github.com/Quick/Nimble.git", exact: "10.0.0"),
+    ],
     targets: [
         .target(
             name: "CHUtils",
@@ -23,7 +27,7 @@ let package = Package(
         ),
         .testTarget(
             name: "CHUtilsTests",
-            dependencies: ["CHUtils"]
+            dependencies: ["CHUtils", "Nimble", "Quick"]
         ),
     ]
 )

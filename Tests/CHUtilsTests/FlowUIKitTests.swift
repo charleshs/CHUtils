@@ -1,3 +1,4 @@
+#if canImport(UIKit)
 import UIKit
 import XCTest
 import CHUtils
@@ -32,3 +33,4 @@ final class FlowUIKitTests: XCTestCase {
         XCTAssertEqual(newVC.modalTransitionStyle, .crossDissolve)
     }
 }
+#endif

@@ -1,3 +1,3 @@
 # CHUtils
 
-A utility library created by Charles Hsieh.
+A utility package created by Charles Hsieh.
