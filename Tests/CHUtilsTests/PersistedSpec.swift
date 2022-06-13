@@ -11,9 +11,13 @@ final class PersistedSpec: QuickSpec {
         @PersistedInfo(key: "message", persistence: UserDefaultsWrapper(.standard), dataTransform: NullTransformer.default)
         var message: String?
 
+        @PersistedInfo(key: "student", persistence: UserDefaultsWrapper(.standard), dataTransform: CodableJSONTransformer())
+        var student: Student?
+
         beforeEach {
             balance = 0
             message = nil
+            student = nil
         }
         describe("PersistedPref without transformer") {
             it("can store value") {
@@ -43,5 +47,24 @@ final class PersistedSpec: QuickSpec {
                 expect(UserDefaults.standard.string(forKey: "message")).to(beNil())
             }
         }
+        describe("PersistedInfo for custom types with transformer") {
+            it("can store value") {
+                student = Student(name: "Charles", grade: 99, gender: .male)
+                expect(student).toNot(beNil())
+                expect(student?.name).to(equal("Charles"))
+                expect(student?.grade).to(equal(99))
+                expect(student?.gender).to(equal(.male))
+            }
+        }
+    }
+}
+
+extension PersistedSpec {
+    struct Student: Codable {
+        enum Gender: Codable { case male, female }
+
+        let name: String
+        let grade: Int
+        let gender: Gender
     }
 }
