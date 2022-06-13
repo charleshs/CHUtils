@@ -1,9 +1,11 @@
-import CHUtils
+@testable import CHUtils
 import Foundation
 import Nimble
 import Quick
 
 final class PersistedSpec: QuickSpec {
+    var subscription: PersistenceSubscription?
+
     override func spec() {
         @PersistedPref(key: "balance", defaultValue: 0, persistence: UserDefaultsWrapper(.standard), dataTransform: NullTransformer.default)
         var balance: Int
@@ -55,6 +57,38 @@ final class PersistedSpec: QuickSpec {
                 expect(student?.grade).to(equal(99))
                 expect(student?.gender).to(equal(.male))
             }
+        }
+        describe("PersistenceSubscribers") {
+            it("removes listeners when subscription is deallocated") {
+                self.subscription = $student.addListener(onChanged: { _, _ in })
+                expect($student.listeners).toNot(beEmpty())
+                self.subscription = nil
+                expect($student.listeners).to(beEmpty())
+            }
+            it("removes listeners when listener call unregister") {
+                self.subscription = $student.addListener(onChanged: { _, _ in })
+                expect($student.listeners).toNot(beEmpty())
+                self.subscription?.unregister()
+                expect($student.listeners).to(beEmpty())
+            }
+            it("will notify listeners on value changes") {
+                student = Student(name: "Charles", grade: 99, gender: .male)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    student = Student(name: "Snoopy", grade: 87, gender: .male)
+                }
+                var newStudent: Student?
+                var oldStudent: Student?
+                self.subscription = $student.addListener(onChanged: { new, old in
+                    newStudent = new
+                    oldStudent = old
+                })
+                expect(newStudent?.name).toEventually(equal("Snoopy"))
+                expect(oldStudent?.name).toEventually(equal("Charles"))
+            }
+        }
+
+        afterEach {
+            self.subscription = nil
         }
     }
 }

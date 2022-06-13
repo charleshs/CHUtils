@@ -7,13 +7,19 @@ public struct PersistedInfo<Value, Storage: Persistence, DataTransform: Transfor
             persistence.loadValue(withType: Value.self, forKey: key, transformer: dataTransform)
         }
         set {
+            let oldValue = wrappedValue
+
             if let newValue = newValue {
                 persistence.saveValue(newValue, forKey: key, transformer: dataTransform)
+                projectedValue.notifyListeners(newValue: newValue, oldValue: oldValue)
             } else {
                 persistence.removeValue(forKey: key)
+                projectedValue.notifyListeners(newValue: nil, oldValue: oldValue)
             }
         }
     }
+
+    public let projectedValue: PersistenceSubscribers = PersistenceSubscribers<Optional<Value>>()
 
     private let key: Storage.Key
     private let persistence: Storage
